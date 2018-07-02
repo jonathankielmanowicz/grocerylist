@@ -1,0 +1,15 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+      "quotes": ["error","double"],
+      "keyword-spacing": [2, {"overrides": {
+        "if": {"after": false},
+        "for": {"after": false}
+      }}],
+      "no-console": "off",
+      "consistent-return": "off",
+      "object-shorthand": ["error", "consistent"],
+      "no-plusplus": "off",
+      "radix": ["error", "as-needed"]
+    }
+}

@@ -37,6 +37,7 @@ app.use("/event", slackEvents.expressMiddleware());
 
 // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
 slackEvents.on("message", (event) => {
+  console.log(event);
   console.log(`Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`);
   respondToEvent(event);
 });
@@ -79,11 +80,6 @@ app.get("/oauth", (req, res) => {
       const teamId = responseText.team_id;
       const userId = responseText.user_id;
 
-      const incomingChannel = responseText.incoming_webhook.channel;
-      const incomingChannelId = responseText.incoming_webhook.channel_id;
-      const incomingConfigUrl = responseText.incoming_webhook.configuration_url;
-      const incomingUrl = responseText.incoming_webhook.url;
-
       const botUserId = responseText.bot.bot_user_id;
       const botAccessToken = responseText.bot.bot_access_token;
 
@@ -92,22 +88,14 @@ app.get("/oauth", (req, res) => {
         team_name: teamName,
         team_id: teamId,
         users: [userId],
-        incoming_channel: incomingChannel,
-        incoming_channel_id: incomingChannelId,
-        incoming_config_url: incomingConfigUrl,
-        incoming_url: incomingUrl,
         bot_user_id: botUserId,
         bot_access_token: botAccessToken,
         raw_json: JSON.stringify(responseText),
-        grocery_list: new Map(),
+        grocery_list: {},
       };
 
       // make a new team entry or update existing one
-      Team.findOneAndUpdate({ team_id: teamId }, newTeam, {
-        setDefaultsOnInsert: true,
-        upsert: true,
-        new: true,
-      }, (err) => {
+      Team.findOneAndUpdate({ team_id: teamId }, newTeam, { upsert: true, new: true }, (err) => {
         if(err) console.log(err);
 
         console.log("saved:", newTeam);

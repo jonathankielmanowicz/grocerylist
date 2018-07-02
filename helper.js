@@ -255,12 +255,12 @@ function eventToAction(event) {
 // If it's the clients first request, set up the web client, then respond
 function respondToEvent(event) {
   // Ignore if bot sends message
-  if(event.bot_id) {
+  if(event.subtype && event.subtype === "bot_message") {
     return;
   }
 
   if(!token) {
-    Team.findOne({ incoming_channel_id: event.channel }, (err, currTeam) => {
+    Team.findOne({ users: event.user }, (err, currTeam) => {
       if(err) return console.log(err);
 
       token = currTeam.bot_access_token;

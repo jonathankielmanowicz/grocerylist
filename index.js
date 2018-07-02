@@ -9,7 +9,7 @@ const { WebClient } = require("@slack/client");
 const slackEvents = createSlackEventAdapter(process.env.SLACK_VERIFICATION_TOKEN);
 
 
-const client = new WebClient();
+let client = new WebClient();
 const clientId = process.env.SLACK_CLIENT_ID;
 const clientSecret = process.env.SLACK_CLIENT_SECRET;
 const PORT = process.env.PORT || 8765;
@@ -26,7 +26,7 @@ const mongoose = require("mongoose");
 const Team = mongoose.model("Team");
 
 // Import the helper and db files
-const respondToEvent = require("./helper.js");
+const helper = require("./helper.js");
 
 // Instantiates Express and assigns our app variable to it
 const app = express();
@@ -39,7 +39,7 @@ app.use("/event", slackEvents.expressMiddleware());
 slackEvents.on("message", (event) => {
   console.log(event);
   console.log(`Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`);
-  respondToEvent(event);
+  helper.respondToEvent(event);
 });
 
 // Handle errors (see `errorCodes` export)
@@ -78,7 +78,6 @@ app.get("/oauth", (req, res) => {
       const accessToken = responseText.access_token;
       const teamName = responseText.team_name;
       const teamId = responseText.team_id;
-      const userId = responseText.user_id;
 
       const botUserId = responseText.bot.bot_user_id;
       const botAccessToken = responseText.bot.bot_access_token;
@@ -87,18 +86,28 @@ app.get("/oauth", (req, res) => {
         access_token: accessToken,
         team_name: teamName,
         team_id: teamId,
-        users: [userId],
+        users: [],
         bot_user_id: botUserId,
         bot_access_token: botAccessToken,
         raw_json: JSON.stringify(responseText),
         grocery_list: {},
       };
 
-      // make a new team entry or update existing one
-      Team.findOneAndUpdate({ team_id: teamId }, newTeam, { upsert: true, new: true }, (err) => {
-        if(err) console.log(err);
+      client = new WebClient(accessToken);
+      client.users.list().then((response) => {
+        // filter through the members and add all non-bots
+        response.members.forEach((member) => {
+          if(member.is_bot === false && member.id !== "USLACKBOT") {
+            newTeam.users.push(member.id);
+          }
+        });
 
-        console.log("saved:", newTeam);
+        // make a new team entry or update existing one
+        Team.findOneAndUpdate({ team_id: teamId }, newTeam, { upsert: true, new: true }, (err) => {
+          if(err) console.log(err);
+
+          console.log("saved:", newTeam);
+        });
       });
     }).catch(console.error);
     res.send("Successfully installed Grocery List!");

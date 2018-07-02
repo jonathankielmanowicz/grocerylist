@@ -145,7 +145,7 @@ function eventToAction(event) {
         if(err) return console.log(err);
 
         const currGroceryList = currTeam.grocery_list;
-        const quantity = currGroceryList.length === 1 ? "1 item" : `${currGroceryList.size} items`;
+        const quantity = currGroceryList.size === 1 ? "1 item" : `${currGroceryList.size} items`;
         responseMessage = `You have *${quantity}* in your grocery list.`;
 
         currGroceryList.forEach((itemProperties, itemName) => {
@@ -263,6 +263,10 @@ function respondToEvent(event) {
     Team.findOne({ users: event.user }, (err, currTeam) => {
       if(err) return console.log(err);
 
+      if(!currTeam) {
+        return console.log("user does not belong to any team");
+      }
+
       token = currTeam.bot_access_token;
       web = new WebClient(token);
       team = currTeam;
@@ -281,4 +285,6 @@ function respondToEvent(event) {
   }
 }
 
-module.exports = respondToEvent;
+module.exports = {
+  respondToEvent,
+};

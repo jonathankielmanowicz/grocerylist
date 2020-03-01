@@ -85,7 +85,7 @@ My roommates and tend to pick up groceries on-the-go, and tend to message one an
 
 #### Aren't there many Slackbots that can make lists?
 
-Yes! I've goen through a few, but they tend to revolve around task lists or have other structures that don't align well with my household dynamic.
+Yes! I've gone through a few, but they tend to revolve around task lists or have other structures that don't align well with my household dynamic.
 
 #### Isn't a grocery list bot a little too niche?
 The problem that was aimed to be solved was the lacking of a grocery list, therefore that is what the initial project is about. That said, I may expand it to cover any type of shopping list in the future.
